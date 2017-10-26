@@ -25,5 +25,6 @@ maior que o original. Para arquivos maiores o algoritmo torna-se eficiente.
 * A decodificação de um arquivo compactado só funciona para arquivos que utilizaram
 o algoritmo presente em [compress.py](https://github.com/ultravic/lzw/blob/master/compressor.py)
 
-##Autor
+## Autor
 * **Victor Picussa** - *BCC UFPR* - *GRR: 20163068*
+
