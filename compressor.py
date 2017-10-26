@@ -1,26 +1,52 @@
-import dictionary
+# Name: Victor Picussa
+# GRR: 20163068
+
+import pickle
+import sys
 
 def compress(infile):
-    ifile = open(infile, 'r')
-    ofile = open(infile + '.lzw', 'w')
-
-    word = ""
-    for c in file:
-        wordc = word + c
-        if wordc in dictionary:
-            word = wordc
+    # Try open the infile, if doesn't exist, throw a error
+    if infile:
+        try:
+            ifile = open(infile, 'r')
+        except IOError:
+            print("The file named '%s' doesn't exist or cannot be found" % infile)
         else:
-            dictionary.dictionarySize += 1
-            dictionary.dictionary[dictionary.dictionarySize] = word
-            word = c
+            # Open the output file
+            ofile = open(infile + '.lzw', 'wb')
 
-    # Output the code for word.
-    if word:
-        dictionary.dictionarySize += 1
-        dictionary.dictionary[dictionary.dictionarySize] = word
-        
-    # Fechar os arquivos e retornar nome do output
-    ifile.close()
-    ofile.close()
+            # Create the base dictionary
+            dictionarySize = 256;
+            dictionary = dict((chr(index), index) for index in xrange(dictionarySize))
 
-    return ofile.name
+            # LZW algorithm
+            letters = ""
+            linecp = []
+            for word in ifile:
+                for character in word:
+                    word_character = letters + character
+                    if word_character in dictionary:
+                        letters = word_character
+                    else:
+                        linecp.append(dictionary[letters])
+                        # While the dictionary size is lower than 16b, values are registered
+                        if dictionarySize < 65537:
+                            dictionary[word_character] = dictionarySize
+                            dictionarySize += 1
+                        letters = character
+            if letters:
+                linecp.append(dictionary[letters])
+
+            # Use pickle to create an object serialized, a byte stream, of the array of codes
+            pickle.dump(linecp, ofile, pickle.HIGHEST_PROTOCOL)
+
+            # Close the files
+            ifile.close()
+            ofile.close()
+
+            print("LZW compression succeded")
+            # Return output file name
+            return ofile.name
+    else:
+        print("Compress function request a file name to compress")
+        sys.exit(0)

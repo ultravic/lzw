@@ -1,33 +1,55 @@
-import dictionary
+# Name: Victor Picussa
+# GRR: 20163068
 
-def decompress(infile):
-    from cStringIO import StringIO
+import pickle
+import sys
 
-    ifile = open(infile, 'r')
-    ofile = open(infile + '.lzw', 'w')
-
-    # use StringIO, otherwordise this becomes O(N^2)
-    # due to string concatenation in a loop
-    result = StringIO()
-    word = chr(file.pop(0))
-    result.write(word)
-    for c in file:
-        if c in dictionary:
-            entry = dictionary[c]
-        elif c == dictionarySize:
-            entry = word + word[0]
+def decompress(infile, outfile):
+    # Try open the infile, if doesn't exist, throw a error
+    if infile and outfile:
+        try:
+            ifile = open(infile, 'rb')
+        except IOError:
+            print("The file named '%s' doesn't exist or cannot be found" % infile)
         else:
-            raise ValueError('Bad file c: %s' % c)
-        result.write(entry)
+            # Open the outfile to decompress infile
+            ofile = open(outfile, 'w')
 
-        # Add word+entry[0] to the dictionary.
-        dictionary[dictionarySize] = word + entry[0]
-        dictionarySize += 1
+            # Create the base dictionary
+            dictionarySize = 256;
+            dictionary = dict((index, chr(index)) for index in xrange(dictionarySize))
 
-        word = entry
+            # Load the pickle object to de-serialize it
+            filecp = pickle.load(ifile)
 
-    # Fechar os arquivos e retornar nome do output
-    ifile.close()
-    ofile.close()
+            # Pop the first character from the array, if
+            word = chr(filecp.pop(0))
 
-    return ofile.name
+            # LZW algorithm
+            linedcp = [word]
+            for character in filecp:
+                if character in dictionary:
+                    letters = dictionary[character]
+                elif character == dictionarySize:
+                    letters = word + word[0]
+                else:
+                    raise ValueError("Compression currupted: character %d unidentifiable" % character)
+                linedcp.append(letters)
+                dictionary[dictionarySize] = word + letters[0]
+                dictionarySize += 1
+                word = letters
+
+            # For each item in the array, write it in the output file
+            for item in linedcp:
+                ofile.write(item)
+
+            # Close the files
+            ifile.close()
+            ofile.close()
+
+            print("LZW decompression succeded")
+            # Return output file name
+            return ofile.name
+    else:
+        print("Decompress function request a file name to decompress and a output")
+        sys.exit(0)
