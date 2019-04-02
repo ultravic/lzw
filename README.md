@@ -26,5 +26,5 @@ maior que o original. Para arquivos maiores o algoritmo torna-se eficiente.
 o algoritmo presente em [compress.py](https://github.com/ultravic/lzw/blob/master/compressor.py)
 
 ## Autor
-* **Victor Picussa** - *BCC UFPR* - *GRR: 20163068*
+* **Victor Picussa**
 
